@@ -1,0 +1,37 @@
+name: CI for Modus Build
+
+on:
+  push:
+    branches:
+      - main  # Trigger this workflow on push to 'main' branch
+  pull_request:
+    branches:
+      - main  # Trigger this workflow on pull requests to 'main' branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Runs the job on the latest Ubuntu machine
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # Checkout the repository code
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'  # You can set the Node.js version according to your needs
+
+      - name: Install Dependencies
+        run: |
+          npm install -g @hypermode/modus-cli  # Install the Modus CLI globally
+          npm install  # Install dependencies from package.json
+
+      - name: Build Modus App
+        run: modus dev  # Run the Modus app build/development process
+
+      - name: Push Changes and Deploy (if applicable)
+        run: |
+          git config --global user.name 'Your Name'  # Set Git user name
+          git config --global user.email 'your-email@example.com'  # Set Git email
+          git commit -am "Trigger deployment"  # Commit changes if any
+          git push origin main  # Push to GitHub (could trigger deployment)
