@@ -19,5 +19,16 @@
       "provider": "hugging-face",
       "connection": "hypermode"
     }
+  },
+  "connections": {
+  "gemini": {
+    "type": "http",
+    "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+    "headers": {
+      "Authorization": "Bearer {{MODUS_GEMINI_API_KEY}}"
+    }
   }
 }
+
+}
+
