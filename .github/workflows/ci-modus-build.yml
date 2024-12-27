@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'  # You can set the Node.js version according to your needs
+          node-version: '22'  # You can set the Node.js version according to your needs
 
       - name: Install Dependencies
         run: |
@@ -31,7 +31,7 @@ jobs:
 
       - name: Push Changes and Deploy (if applicable)
         run: |
-          git config --global user.name 'Your Name'  # Set Git user name
-          git config --global user.email 'your-email@example.com'  # Set Git email
+          git config --global user.name 'MukeshAofficial'  # Set Git user name
+          git config --global user.email 'mukeshofficial685@gmail.com'  # Set Git email
           git commit -am "Trigger deployment"  # Commit changes if any
           git push origin main  # Push to GitHub (could trigger deployment)
