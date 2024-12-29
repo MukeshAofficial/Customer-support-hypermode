@@ -2,6 +2,7 @@ export function sayHello(name: string | null = null): string {
   return `Hello, ${name || "World"}!`;
 }
 export * from "./quotes";
+export * from "./scrape";
 
 import { models } from "@hypermode/modus-sdk-as";
 import { EmbeddingsModel } from "@hypermode/modus-sdk-as/models/experimental/embeddings";

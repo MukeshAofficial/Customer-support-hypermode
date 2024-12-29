@@ -12,6 +12,15 @@
       "type": "http",
       "baseUrl": "https://zenquotes.io/"
     },
+    "webscrape": {
+      "type": "http",
+      "baseUrl": "http://localhost:5000/"
+    },
+    "dgraph": {
+      "type": "dgraph",
+      "grpcTarget": "https://green-feather-41451508.ap-south-1.aws.cloud.dgraph.io/graphql",
+      "key": "{{API_KEY}}"
+    },
     "gemini": {
       "type": "http",
       "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
