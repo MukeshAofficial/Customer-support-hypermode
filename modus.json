@@ -40,5 +40,17 @@
       "provider": "hugging-face",
       "connection": "hypermode"
     }
+  },
+  "collections": {
+    "texts": {
+      "searchMethods": {
+        "searchMethod1": {
+          "embedder": "miniLMEmbed",
+          "index": {
+            "type": "sequential"
+          }
+        }
+      }
+    }
   }
 }
