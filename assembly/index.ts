@@ -58,25 +58,24 @@ export function upsertTexts(ids: string[], texts: string[]): string[] {
   return ids
 }
 
-
+/**
+ * Perform a vector search using an embedding of the input string
+ */
 export function search(query: string): string[] {
   const searchResults = collections.search(textsCollection, searchMethod, query, 10, true)
 
   if (!searchResults.isSuccessful) {
     return [searchResults.error]
   }
-  
   const searchTexts: string[] = []
 
-  // Check if there are any search results, and get only the first result's text
-  if (searchResults.objects.length > 0) {
-    const firstObject = searchResults.objects[0]
-    const firstText = collections.getText(textsCollection, firstObject.key)
-    if (firstText) {
-      searchTexts.push(firstText)  // Add the first result's text to the array
+  for (let i = 0; i < searchResults.objects.length; i++) {
+    const obj = searchResults.objects[i]
+    const text = collections.getText(textsCollection, obj.key)
+    if (text) {
+      searchTexts.push(text)
     }
   }
-  
   return searchTexts
 }
 
