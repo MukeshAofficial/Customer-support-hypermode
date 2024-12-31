@@ -3,6 +3,7 @@ export function sayHello(name: string | null = null): string {
 }
 export * from "./quotes";
 export * from "./scrape";
+export * from "./stock";
 
 import { collections } from "@hypermode/modus-sdk-as"
 

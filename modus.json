@@ -19,13 +19,20 @@
     "dgraph": {
       "type": "dgraph",
       "grpcTarget": "https://green-feather-41451508.ap-south-1.aws.cloud.dgraph.io/graphql",
-      "key": "{{API_KEY}}"
+      "key": "{{MODUS_API_KEY}}"
     },
     "gemini": {
       "type": "http",
       "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
       "headers": {
         "Authorization": "Bearer {{MODUS_GEMINI_API_KEY}}"
+      }
+    },
+    "stocks": {
+      "type": "http",
+      "baseUrl": "https://www.alphavantage.co/",
+      "queryParameters": {
+        "apikey": "{{MODUS_STOCK_API_KEY}}"
       }
     }
   },
