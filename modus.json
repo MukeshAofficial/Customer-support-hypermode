@@ -32,7 +32,7 @@
       "type": "http",
       "baseUrl": "https://www.alphavantage.co/",
       "queryParameters": {
-        "apikey": "{{MODUS_STOCK_API_KEY}}"
+        "apikey": "H9ETK1LQ0ZMYFZDZ"
       }
     }
   },
