@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Info Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script>
+        let chatMessages = [];
+
+        async function fetchStockData() {
+            const symbol = document.getElementById('stockSymbol').value.toUpperCase();
+            addMessage("User", `Show me information about ${symbol}`);
+            
+            const query = `query($symbol: String!) {
+                callStockPriceApi(symbol: $symbol)
+                fetchCompanyinfo(symbol: $symbol)
+                fetchNews(symbol: $symbol)
+            }`;
+
+            const variables = { symbol };
+
+            try {
+                const response = await fetch('http://localhost:8686/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query, variables }),
+                });
+
+                const result = await response.json();
+
+                // Update Stock Info Panel
+                if (result.data.callStockPriceApi) {
+                    const stockData = JSON.parse(result.data.callStockPriceApi);
+                    const globalQuote = stockData["Global Quote"];
+                    if (globalQuote) {
+                        document.getElementById('stockInfo').innerHTML = `
+                            <h2 class="text-xl font-semibold mb-4">Market Data</h2>
+                            <div class="space-y-2">
+                                <p><span class="text-gray-400">Symbol:</span> ${globalQuote["01. symbol"]}</p>
+                                <p><span class="text-gray-400">Price:</span> $${globalQuote["05. price"]}</p>
+                                <p><span class="text-gray-400">High:</span> $${globalQuote["03. high"]}</p>
+                                <p><span class="text-gray-400">Low:</span> $${globalQuote["04. low"]}</p>
+                            </div>`;
+                    }
+                }
+
+                // Update Company Info
+                if (result.data.fetchCompanyinfo) {
+                    const companyInfo = JSON.parse(result.data.fetchCompanyinfo);
+                    document.getElementById('companyInfo').innerHTML = `
+                        <h2 class="text-xl font-semibold mb-4">Company Overview</h2>
+                        <div class="space-y-3">
+                            <p class="text-lg font-medium">${companyInfo.Name}</p>
+                            <p class="text-sm text-gray-300">${companyInfo.Description}</p>
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <p class="text-gray-400">Sector</p>
+                                    <p>${companyInfo.Sector}</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400">Industry</p>
+                                    <p>${companyInfo.Industry}</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400">Market Cap</p>
+                                    <p>$${(companyInfo.MarketCapitalization / 1e9).toFixed(2)}B</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400">EPS</p>
+                                    <p>$${companyInfo.EPS}</p>
+                                </div>
+                            </div>
+                            <p class="mt-4">
+                                <a href="${companyInfo.OfficialSite}" target="_blank" class="text-blue-400 hover:underline">
+                                    Visit Website →
+                                </a>
+                            </p>
+                        </div>`;
+                }
+
+                // Update News Panel
+                if (result.data.fetchNews) {
+                    const newsData = JSON.parse(result.data.fetchNews);
+                    const feed = newsData.feed.slice(0, 10);
+                    const relevantNews = feed.filter(article =>
+                        article.ticker_sentiment.some(ticker => ticker.ticker === symbol)
+                    );
+
+                    let newsHtml = `<h2 class="text-xl font-semibold mb-4">Latest News</h2>`;
+                    if (relevantNews.length > 0) {
+                        newsHtml += `<div class="space-y-4">`;
+                        relevantNews.forEach(article => {
+                            const symbolSentiment = article.ticker_sentiment.find(ticker => ticker.ticker === symbol);
+                            const sentimentColor = symbolSentiment.ticker_sentiment_label === 'Positive' ? 'text-green-400' : 
+                                                 symbolSentiment.ticker_sentiment_label === 'Negative' ? 'text-red-400' : 'text-yellow-400';
+                            newsHtml += `
+                                <div class="border-b border-gray-700 pb-4">
+                                    <h3 class="font-medium mb-2">${article.title}</h3>
+                                    <p class="text-sm text-gray-300 mb-2">${article.summary}</p>
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="${sentimentColor}">
+                                            ${symbolSentiment.ticker_sentiment_label} (${symbolSentiment.ticker_sentiment_score})
+                                        </span>
+                                        <a href="${article.url}" target="_blank" class="text-blue-400 hover:underline">Read more →</a>
+                                    </div>
+                                </div>`;
+                        });
+                        newsHtml += `</div>`;
+                    } else {
+                        newsHtml += '<p class="text-gray-300">No relevant news available.</p>';
+                    }
+                    document.getElementById('newsPanel').innerHTML = newsHtml;
+                }
+
+                // Add assistant message to chat
+                addMessage("Assistant", `I've found the information for ${symbol}. You can see the market data, company overview, and latest news in the panels. What specific information would you like to know about?`);
+
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage("Assistant", "Sorry, I encountered an error while fetching the data. Please try again.");
+            }
+        }
+
+        function addMessage(sender, text) {
+            chatMessages.push({ sender, text, timestamp: new Date() });
+            updateChat();
+        }
+
+        function updateChat() {
+            const chatContainer = document.getElementById('chatMessages');
+            chatContainer.innerHTML = chatMessages.map(msg => `
+                <div class="flex ${msg.sender === 'User' ? 'justify-end' : 'justify-start'} mb-4">
+                    <div class="max-w-[70%] ${msg.sender === 'User' ? 'bg-blue-600' : 'bg-gray-700'} rounded-lg px-4 py-2">
+                        <div class="text-sm mb-1 ${msg.sender === 'User' ? 'text-blue-200' : 'text-gray-300'}">${msg.sender}</div>
+                        <div>${msg.text}</div>
+                        <div class="text-xs text-gray-400 mt-1">${moment(msg.timestamp).format('HH:mm')}</div>
+                    </div>
+                </div>
+            `).join('');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</head>
+
+<body class="bg-gray-900 text-white font-sans">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-gray-800 border-b border-gray-700 p-4">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <h1 class="text-2xl font-bold text-blue-400">Stock Analyst AI</h1>
+                <div class="flex items-center space-x-4">
+                    <input type="text" id="stockSymbol" class="bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter stock symbol...">
+                    <button onclick="fetchStockData()" class="bg-blue-600 px-6 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Analyze
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="flex-1 max-w-7xl mx-auto w-full p-4 grid grid-cols-12 gap-4">
+            <!-- Left Panel - Stock & Company Info -->
+            <div class="col-span-3 space-y-4">
+                <!-- Stock Info Card -->
+                <div class="bg-gray-800 rounded-lg p-4" id="stockInfo">
+                    <p class="text-gray-400">Enter a stock symbol to view market data</p>
+                </div>
+                <!-- Company Info Card -->
+                <div class="bg-gray-800 rounded-lg p-4" id="companyInfo">
+                    <p class="text-gray-400">Company information will appear here</p>
+                </div>
+            </div>
+
+            <!-- Middle Panel - Chat Interface -->
+            <div class="col-span-6 bg-gray-800 rounded-lg flex flex-col">
+                <div id="chatMessages" class="flex-1 p-4 space-y-4 overflow-y-auto" style="height: calc(100vh - 200px);">
+                    <div class="text-center text-gray-400">
+                        Enter a stock symbol to start analyzing
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - News Feed -->
+            <div class="col-span-3 bg-gray-800 rounded-lg p-4 overflow-y-auto" id="newsPanel" style="height: calc(100vh - 200px);">
+                <p class="text-gray-400">News feed will appear here</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

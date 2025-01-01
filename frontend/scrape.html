@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmbedBOT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom message bubbles and chat box styles */
+        .chat-box {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .message {
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin: 10px 0;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        .user {
+            background-color: #3b82f6;
+            color: white;
+            margin-left: auto;
+            margin-right: 10px;
+        }
+        .bot {
+            background-color: #f3f4f6;
+            color: #333;
+            margin-left: 10px;
+        }
+        .loader {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .embed-widget {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f4f8;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-blue-700 min-h-screen">
+    <div class="container mx-auto px-4 py-8 h-screen flex">
+        <div class="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden flex">
+            <!-- Sidebar -->
+            <div class="w-1/4 bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6">
+                <div class="flex items-center space-x-3 mb-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <h1 class="text-2xl font-bold">CustomerCare AI</h1>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <h2 class="text-lg font-semibold text-blue-400 mb-2">About</h2>
+                        <p class="text-gray-300 text-sm">Your dedicated AI customer support assistant, available 24/7 to help with inquiries and provide information.</p>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-blue-400 mb-2">Features</h2>
+                        <ul class="text-gray-300 text-sm space-y-2">
+                            <li>• Instant Inquiry Resolution</li>
+                            <li>• Product Information</li>
+                            <li>• FAQ Assistance</li>
+                            <li>• Live Support</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="flex-1 flex flex-col">
+                <!-- Chat Header -->
+                <div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Customer Support</h3>
+                            <p class="text-sm text-green-500">Online</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Messages -->
+                <div id="chat-box" class="flex-1 bg-gray-50 p-6 overflow-y-auto chat-box">
+                    <!-- Messages will appear here -->
+                </div>
+
+                <!-- Chat Input -->
+                <div class="bg-white border-t border-gray-200 p-4">
+                    <div class="flex space-x-4">
+                        <input 
+                            type="text" 
+                            id="user-input"
+                            class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Ask your health-related question..."
+                            onkeydown="if(event.key === 'Enter') document.getElementById('send-button').click()"
+                        >
+                        <button 
+                            id="send-button"
+                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2"
+                        >
+                            <span>Send</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Embed Code Section -->
+    <div class="embed-widget max-w-lg mx-auto p-6 bg-white rounded-xl shadow-xl mt-10">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Embed Chatbot on Your Website</h3>
+        <p class="text-sm text-gray-600 mb-4">Copy the following code and paste it into your website's HTML to embed this chatbot.</p>
+        <textarea id="embed-code" class="w-full h-28 p-4 border rounded-lg bg-gray-50 text-gray-800 font-mono" readonly>
+&lt;div id="chat-widget"&gt;&lt;/div&gt;
+&lt;script&gt;
+  (function() {
+    var script = document.createElement('script');
+    script.src = 'https://path-to-your-chatbot.js';
+    script.async = true;
+    document.getElementById('chat-widget').appendChild(script);
+  })();
+&lt;/script&gt;
+        </textarea>
+        <button id="copy-button" class="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">Copy Embed Code</button>
+    </div>
+
+    <script>
+        // Handle sending the message from user input
+        document.getElementById('send-button').addEventListener('click', function() {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput.trim() !== '') {
+                addMessage('user', userInput);
+                document.getElementById('user-input').value = '';
+                
+                // Add loading state for bot
+                addMessage('bot', 'Thinking...', true);
+                
+                // Simulating a network request to get bot's response
+                setTimeout(function() {
+                    fetch('/get_response', {
+                        method: 'POST',
+                        body: JSON.stringify({ message: userInput }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Remove the thinking message and add the real response
+                        const chatBox = document.getElementById('chat-box');
+                        chatBox.removeChild(chatBox.lastChild); // Remove 'Thinking...'
+
+                        addMessage('bot', data.response);
+                    });
+                }, 1000);
+            }
+        });
+
+        // Add messages to chat
+        function addMessage(sender, text, isLoading = false) {
+            const chatBox = document.getElementById('chat-box');
+            const message = document.createElement('div');
+            message.classList.add('message', sender);
+
+            if (isLoading) {
+                message.innerHTML = '<span class="loader"></span> Please wait...';
+            } else {
+                message.textContent = text;
+            }
+            chatBox.appendChild(message);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Embed code copy functionality
+        document.getElementById('copy-button').addEventListener('click', function() {
+            const embedCode = document.getElementById('embed-code');
+            embedCode.select();
+            document.execCommand('copy');
+            alert('Embed code copied to clipboard!');
+        });
+    </script>
+</body>
+</html>
