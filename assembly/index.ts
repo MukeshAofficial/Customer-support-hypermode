@@ -4,6 +4,8 @@ export function sayHello(name: string | null = null): string {
 export * from "./quotes";
 export * from "./scrape";
 export * from "./stock";
+export * from "./functioncall";
+export * from "./AIAgent";
 
 import { collections } from "@hypermode/modus-sdk-as"
 
@@ -87,4 +89,3 @@ export function miniLMEmbed(texts: string[]): f32[][] {
   const output = model.invoke(input);
   return output.predictions;
 }
-
