@@ -6,6 +6,7 @@ export * from "./scrape";
 export * from "./stock";
 export * from "./functioncall";
 export * from "./AIAgent";
+export * from "./CodingAgent";
 
 import { collections } from "@hypermode/modus-sdk-as"
 

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Website Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #preview {
+            height: calc(100vh - 128px);
+            border: 1px solid #ccc;
+            background-color: #fff;
+            overflow: auto;
+        }
+        #loading {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-4 shadow-lg">
+        <h1 class="text-2xl font-bold">AI Website Generator</h1>
+        <div class="flex items-center space-x-2">
+            <input 
+                type="text" 
+                id="websiteTitle" 
+                placeholder="Enter Website Title" 
+                class="px-4 py-2 rounded-l border focus:outline-none text-black w-72 shadow-sm" 
+            />
+            <button 
+                id="generateButton" 
+                class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-r font-semibold shadow-lg transition-all">
+                Generate
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div id="preview" class="mt-4 mx-auto max-w-full bg-white shadow-md p-6 rounded-lg flex items-center justify-center relative">
+        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 z-10">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-600 border-opacity-75"></div>
+            <p id="loadingText" class="mt-4 text-lg font-semibold text-gray-700">Generating code...</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('generateButton').addEventListener('click', async () => {
+            const websiteTitle = document.getElementById('websiteTitle').value.trim();
+            if (!websiteTitle) {
+                alert('Please enter a website title.');
+                return;
+            }
+
+            // Show loading screen and start messages
+            showLoadingMessages();
+
+            // GraphQL query to fetch website code
+            const query = `query($websiteTitle: String!) {\n  generateWebsiteCode(websiteTitle: $websiteTitle)\n}`;
+            const variables = { websiteTitle };
+
+            try {
+                const response = await fetch('http://localhost:8686/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query, variables })
+                });
+                const result = await response.json();
+
+                if (result.data && result.data.generateWebsiteCode) {
+                    const code = result.data.generateWebsiteCode;
+                    displayCode(code);
+                } else {
+                    throw new Error('Failed to generate website code.');
+                }
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+
+        function displayCode(rawCode) {
+            const preview = document.getElementById('preview');
+
+            const htmlMatch = rawCode.match(/```html\n([\s\S]*?)```/);
+            const htmlCode = htmlMatch ? htmlMatch[1].trim() : '';
+
+            const cssMatch = rawCode.match(/```css\n([\s\S]*?)```/);
+            const cssCode = cssMatch ? cssMatch[1].trim() : '';
+
+            preview.innerHTML = '';
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+
+            preview.appendChild(iframe);
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open();
+            doc.write(`<!DOCTYPE html><html lang="en"><head><style>${cssCode}</style></head><body>${htmlCode}</body></html>`);
+            doc.close();
+        }
+
+        async function showLoadingMessages() {
+            const loading = document.getElementById('loading');
+            const loadingText = document.getElementById('loadingText');
+            loading.style.display = 'flex';
+
+            const messages = [
+                'Loading design...',
+                'Adding colors...',
+                'Making it pretty...',
+                'Almost ready...',
+                'Setting things up...',
+                'Getting your page ready...',
+                'Magic happening...',
+                'Putting it all together...'
+            ];
+
+            for (let i = 0; i < messages.length - 1; i++) {
+                loadingText.textContent = messages[i];
+                await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds
+            }
+            
+            // Set the last message and keep it until the content loads
+            loadingText.textContent = messages[messages.length - 1];
+        }
+    </script>
+</body>
+</html>
